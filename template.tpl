@@ -1138,14 +1138,6 @@ ___TEMPLATE_PARAMETERS___
         "name": "cookieDomain",
         "type": "TEXT"
       },
-      {
-        "help": "If checked, you\u0027ll see Google Tag Manager as a traffic source in Piwik PRO \u003e Analytics \u003e Settings \u003e Tracker debugger. (Available for 16.12+)",
-        "defaultValue": true,
-        "simpleValueType": true,
-        "name": "setTrackingSource",
-        "checkboxText": "Send the traffic source to the tracker debugger",
-        "type": "CHECKBOX"
-      }
     ]
   },
   {
@@ -1406,11 +1398,12 @@ ___TEMPLATE_PARAMETERS___
         "type": "TEXT"
       },
       {
-        "help": "If turned on, the tracking code won’t conflict with other tracking codes used on the website. We’ll change _paq to _ppas and Piwik to PPAS.",
+        "help": "Append a custom query parameter to each tracking request URL (e.g. pk_source=newsletter).",
+        "displayName": "Append to tracking URL",
         "simpleValueType": true,
-        "name": "useAlternativeNamespace",
-        "checkboxText": "Use an alternative namespace",
-        "type": "CHECKBOX"
+        "name": "appendToTrackingUrl",
+        "type": "TEXT",
+        "valueHint": "key=value"
       }
     ]
   }
@@ -1446,13 +1439,8 @@ if (checkURL.indexOf("/") > 0) {
     data.instanceURL = checkURL.split("/")[0].replace(":##", "://");
 }
 
-if (data.useAlternativeNamespace == true) {
-  _pp = createQueue('_ppas');
-  jsTracker = data.instanceURL + "/" + "ppas.js";
-} else {
-  _pp = createQueue('_paq');
-  jsTracker = data.instanceURL + "/" + "ppms.js";
-}
+_pp = createQueue('_paq');
+jsTracker = data.instanceURL + "/" + "ppms.js";
 
 const analyticsGranted = isConsentGranted('analytics_storage');
 const gcmConsentGrantedCookies = (data.useCookies == "followGCM") ? analyticsGranted : true;
@@ -1477,6 +1465,10 @@ if (data.customEventTitle && data.customEventTitle !== "")
 // Override page referrer
 if (data.customPageReferrer && data.customPageReferrer !== "")
   _pp(['setReferrerUrl', data.customPageReferrer]);
+
+// Append custom query parameter to tracking URL
+if (data.appendToTrackingUrl && data.appendToTrackingUrl !== "")
+  _pp(['appendToTrackingUrl', data.appendToTrackingUrl]);
 
 
 /********************
@@ -1777,10 +1769,6 @@ if (data.trackingType == 'event') {
     _pp(['setCookieDomain', data.cookieDomain]);
   }
 
-  // Traffic source tracking
-  if (data.setTrackingSource == true) {
-    _pp(['setTrackingSource', 'gtm', '2.1.0']);
-  }
 
   // Setting the User ID
   if (data.setUserID == true) {
@@ -1834,6 +1822,12 @@ if (data.trackingType == 'event') {
 
     if (data.disableTrackerInjection == false) {
       injectScript(jsTracker, onSuccess, onFailure, jsTracker);
+    } else {
+      // Load the JS tracking client from the server-side endpoint, avoiding the need for a separate cHTML tag
+      const ssJs = trackerURL.indexOf('ppms.php') > -1
+        ? trackerURL.replace('ppms.php', 'ppms.js')
+        : jsTracker;
+      injectScript(ssJs, onSuccess, onFailure, ssJs);
     }
   };
   // Launch the tracking code
@@ -1881,6 +1875,10 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://*.piwik.pro/"
+              },
+              {
+                "type": 1,
+                "string": "https://analytics.*/"
               }
             ]
           }
@@ -2151,7 +2149,6 @@ setup: |-
   const mockData = {
     instanceURL: "https://example.piwik.pro",
     websiteID: "12a3bc45-6789-0def-ghi1-2j34klm5no6p",
-    useAlternativeNamespace: false,
     analyticsDomains: ["example.com"]
   };
 
