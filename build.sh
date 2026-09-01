@@ -21,6 +21,7 @@ with open(domains_file) as f:
     for line in f:
         line = line.strip()
         if line and not line.startswith('#'):
+            line = line.removeprefix('https://').removeprefix('http://').strip('/')
             domains.append(line)
 
 if not domains:
@@ -38,7 +39,7 @@ for domain in domains:
 with open(source_file) as f:
     content = f.read()
 
-MARKER = '"https://*.piwik.pro/"'
+MARKER = '"https://*.piwik.pro/"\n              }'
 if MARKER not in content:
     print("Error: could not find injection point in template.tpl.")
     sys.exit(1)
