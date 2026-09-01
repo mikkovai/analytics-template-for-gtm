@@ -1875,10 +1875,6 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://*.piwik.pro/"
-              },
-              {
-                "type": 1,
-                "string": "https://analytics.*/"
               }
             ]
           }
