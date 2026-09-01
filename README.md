@@ -2,6 +2,12 @@
 
 > [!NOTE]
 > Note that this fork includes my customisations to fit the template to my needs. See Piwik's own repo for the original.
+>
+> In this fork I've done this:
+>
+> - Added the appendToTrackingUrl method so that a Meta event id can be added to requests as a query parametre. This allows for deduplication in server-side CAPI implementations.
+> - Removed the fields for `setTrackingSource` and `useAlternativeNamespace`because the template went over the GTM limit of 100 fields, and deemed these two unnecessary for myself.
+> - Added a `build.sh` script that reads a `domains.txt` file and adds inject script permissions to the template for each of the URLs. This helps in managing a bunch of containers that use the same template, you just add all the urls in the txt file, run build.sh and import the template to each container.
 
 Analyze the customer journey across websites and apps.
 
