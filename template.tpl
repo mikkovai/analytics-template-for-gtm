@@ -1639,7 +1639,7 @@ if (data.trackingType == 'event') {
 } else if (data.trackingType == 'impression') {
 
   //track content impressions
-  _pp(['trackContentImpression', data.contentName, data.contentPiece, data.contentTarget]);
+  _pp(['trackContentImpression', data.contentNameImpressions, data.contentPieceImpressions, data.contentTargetImpressions]);
   data.gtmOnSuccess();
   
 } else if (data.trackingType == 'interaction') {
